@@ -1,0 +1,6 @@
+<odoo>
+  <data>
+    <menuitem id="menu_my_demo_root" name="My Demo"/>
+    <menuitem id="menu_my_demo_sub" name="Hello From Git" parent="menu_my_demo_root" sequence="10"/>
+  </data>
+</odoo>
