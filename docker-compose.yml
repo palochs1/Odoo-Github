@@ -1,6 +1,7 @@
 services:
   db:
     image: postgres:14-alpine
+    platform: linux/amd64
     container_name: odoo15_db_git
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
@@ -18,12 +19,13 @@ services:
 
   odoo:
     image: odoo:15
+    platform: linux/amd64
     container_name: odoo15_app_git
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "8069:8069"
+      - "8070:8069"
     environment:
       - HOST=db
       - USER=${POSTGRES_USER}
@@ -42,6 +44,7 @@ services:
 
   db_backup:
     image: prodrigestivill/postgres-backup-local:15
+    platform: linux/amd64
     container_name: odoo15_db_backup
     depends_on: [db]
     environment:
