@@ -1,0 +1,62 @@
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: odoo15_db
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - TZ=${TZ}
+    volumes:
+      - dbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  odoo:
+    image: odoo:15
+    container_name: odoo15_app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8069:8069"
+    environment:
+      - HOST=db
+      - USER=${POSTGRES_USER}
+      - PASSWORD=${POSTGRES_PASSWORD}
+      - TZ=${TZ}
+    volumes:
+      - ./addons:/mnt/extra-addons:cached
+      - odoo_data:/var/lib/odoo
+    command: >
+      odoo -d ${POSTGRES_DB}
+           --db_host db
+           --db_user ${POSTGRES_USER}
+           --db_password ${POSTGRES_PASSWORD}
+           --addons-path=/usr/lib/python3/dist-packages/odoo/addons,/var/lib/odoo/addons/15.0,/mnt/extra-addons
+    restart: unless-stopped
+
+  db_backup:
+    image: prodrigestivill/postgres-backup-local:15
+    container_name: odoo15_db_backup
+    depends_on: [db]
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - SCHEDULE=@daily
+      - BACKUP_DIR=/backups
+      - BACKUP_KEEP_DAYS=14
+      - TZ=${TZ}
+    volumes:
+      - ./backups:/backups
+    restart: unless-stopped
+
+volumes:
+  dbdata:
+  odoo_data:

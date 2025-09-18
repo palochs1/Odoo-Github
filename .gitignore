@@ -1,0 +1,17 @@
+# macOS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Odoo
+.odoo/
+*.log
+
+# อย่า commit ข้อมูลจริง
+backups/
